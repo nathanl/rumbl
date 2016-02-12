@@ -1,7 +1,5 @@
 defmodule Rumbl.User do
   use Rumbl.Web, :model
-  @required_params ~w(name username)
-  @optional_params ~w()
 
   schema "users" do
     field :name, :string
@@ -14,7 +12,35 @@ defmodule Rumbl.User do
 
   def changeset(model, params \\ :empty) do
     model
-    |> cast(params, @required_params, @optional_params)
+    |> cast(params, ~w(name username), [])
     |> validate_length(:username, min: 1, max: 20)
   end
+
+  def registration_changeset(model, params) do
+    model
+    |> changeset(params)
+    |> cast(params, ~w(password), [])
+    |> validate_length(:password, min: 6, max: 100)
+    |> put_pass_hash()
+  end
+
+  defp put_pass_hash(changeset) do
+    case changeset do
+      %Ecto.Changeset{valid?: true, changes: %{password: pass}} ->
+        IO.inspect "gonna hash that mess"
+        put_change(changeset, :password_hash, Comeonin.Bcrypt.hashpwsalt(pass))
+      _ ->
+        changeset
+    end
+  end
+
+  # equivilent hypothetical Ruby
+  # def put_pass_hash(changeset)
+  #   if changeset.valid? && pass = changeset.password.presence
+  #     put_change(changeset, :password_hash, Comeonin::Bcrypt.hashpwsalt(pass))
+  #   else
+  #     changeset
+  #   end
+  # end
+
 end
