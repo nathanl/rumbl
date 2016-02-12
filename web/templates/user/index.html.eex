@@ -5,8 +5,9 @@
     <tr>
       <td><b><%= render "user.html", user: user %></b>
       </td>
-      <td><%= link("View", to: user_path(@conn, :show, user.id)) |> IO.inspect %></td>
+      <td><%= link("View", to: user_path(@conn, :show, user.id)) %></td>
 
     </tr>
   <% end %>
+  <%= link("New user", to: user_path(@conn, :new)) %>
 </table>
