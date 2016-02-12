@@ -1,0 +1,1 @@
+What the heck is @user in the view - not a module attribute, right? (it's special sytnax for eex to interpret using the assigns map)
