@@ -18,4 +18,28 @@ defmodule Rumbl.Auth do
     |> put_session(:user_id, user.id)
     |> configure_session(renew: true)
   end
+
+  def login_by_username_and_pass(conn, username, given_pass, opts) do
+    import Comeonin.Bcrypt, only: [checkpw: 2, dummy_checkpw: 0]
+    repo = Keyword.fetch!(opts, :repo)
+    user = repo.get_by(Rumbl.User, username: username)
+
+    cond do
+      user && checkpw(given_pass, user.password_hash) ->
+        {:ok, login(conn, user)}
+      user ->
+        {:error, :unauthorized, conn}
+      true ->
+        # simulate a password check with variable timing, so that nobody can
+        # tell by timing that the user doesn't exist :)
+        dummy_checkpw()
+        {:error, :not_found, conn}
+    end
+  end
+
+  def logout(conn) do
+    # drop the whole session at the end of the request. It would also
+    # be possible to just delete the user id from the session
+    configure_session(conn, drop: true)
+  end
 end
